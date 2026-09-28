@@ -102,7 +102,18 @@ namespace WebAppUI.Controllers
                 return Forbid();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _analyticsService.TrackView(article.Id, userId, null, Request.Headers.UserAgent.ToString());
+
+            var cookieName = $"viewed_{article.Id}";
+            if (Request.Cookies[cookieName] == null)
+            {
+                _analyticsService.TrackView(article.Id, userId, null, Request.Headers.UserAgent.ToString());
+                Response.Cookies.Append(cookieName, "1", new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddHours(24),
+                    HttpOnly = true,
+                    IsEssential = true
+                });
+            }
             article.ViewsCount = _analyticsService.GetTotalViews(article.Id);
             var reactions = _reactionService.GetCounts(article.Id);
             article.LikesCount = reactions.likes;
