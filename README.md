@@ -68,26 +68,26 @@ https://news-portal-qo2j.onrender.com
 
 | Главная | Лента новостей |
 |---|---|
-| ![Главная](docs/screenshots/home.png) | ![Новости](docs/screenshots/news-grid.png) |
+| ![Главная](docs/screenshots/image2.png) | ![Лента](docs/screenshots/image5.png) |
 
 | Все новости с фильтрами | Страница новости |
 |---|---|
-| ![Все новости](docs/screenshots/news-list.png) | ![Новость](docs/screenshots/details.png) |
+| ![Все новости](docs/screenshots/image11.png) | ![Новость](docs/screenshots/image1.png) |
 
 | Вход | Регистрация |
 |---|---|
-| ![Вход](docs/screenshots/login.png) | ![Регистрация](docs/screenshots/register.png) |
+| ![Вход](docs/screenshots/image3.png) | ![Регистрация](docs/screenshots/image4.png) |
 
 ### Админ-панель
 
 | Управление новостями | Категории |
 |---|---|
-| ![Управление](docs/screenshots/admin-manage.png) | ![Категории](docs/screenshots/admin-categories.png) |
+| ![Управление](docs/screenshots/image6.png) | ![Категории](docs/screenshots/image9.png) |
 
 | Пользователи | Редактирование ролей |
 |---|---|
-| ![Пользователи](docs/screenshots/admin-users.png) | ![Роли](docs/screenshots/admin-roles.png) |
+| ![Пользователи](docs/screenshots/image7.png) | ![Роли](docs/screenshots/image8.png) |
 
 | Аналитика |
 |---|
-| ![Аналитика](docs/screenshots/admin-analytics.png) |
+| ![Аналитика](docs/screenshots/image10.png) |
