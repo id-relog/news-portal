@@ -61,3 +61,33 @@ Vladimir — [GitHub](https://github.com/id-relog)
 
 ## Демо
 https://news-portal-qo2j.onrender.com
+
+## Скриншоты
+
+### Публичная часть
+
+| Главная | Лента новостей |
+|---|---|
+| ![Главная](docs/screenshots/home.png) | ![Новости](docs/screenshots/news-grid.png) |
+
+| Все новости с фильтрами | Страница новости |
+|---|---|
+| ![Все новости](docs/screenshots/news-list.png) | ![Новость](docs/screenshots/details.png) |
+
+| Вход | Регистрация |
+|---|---|
+| ![Вход](docs/screenshots/login.png) | ![Регистрация](docs/screenshots/register.png) |
+
+### Админ-панель
+
+| Управление новостями | Категории |
+|---|---|
+| ![Управление](docs/screenshots/admin-manage.png) | ![Категории](docs/screenshots/admin-categories.png) |
+
+| Пользователи | Редактирование ролей |
+|---|---|
+| ![Пользователи](docs/screenshots/admin-users.png) | ![Роли](docs/screenshots/admin-roles.png) |
+
+| Аналитика |
+|---|
+| ![Аналитика](docs/screenshots/admin-analytics.png) |
