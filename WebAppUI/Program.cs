@@ -61,13 +61,12 @@ using WebAppUI.Auth;
     app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+    await RoleSeeder.EnsureRolesAsync(app.Services);
+    await AdminSeeder.EnsureDefaultAdminAsync(
+        app.Services,
+        builder.Configuration["DefaultAdmin:Email"] ?? string.Empty,
+        builder.Configuration["DefaultAdmin:Password"] ?? string.Empty);
     app.Run();
-        
-    
 
- //await RoleSeeder.EnsureRolesAsync(app.Services);
-    //await AdminSeeder.EnsureDefaultAdminAsync(
-    //    app.Services,
-    //    builder.Configuration["DefaultAdmin:Email"] ?? string.Empty,
-    //    builder.Configuration["DefaultAdmin:Password"] ?? string.Empty);
+
+
