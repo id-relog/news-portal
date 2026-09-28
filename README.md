@@ -57,4 +57,4 @@
 
 ## Автор
 
-Vladimir Dvorak — [GitHub](https://github.com/id-relog)
+Vladimir — [GitHub](https://github.com/id-relog)
