@@ -1,0 +1,48 @@
+@model WebAppUI.Models.Analytics.AnalyticsIndexViewModel
+@{
+    ViewData["Title"] = "Аналитика";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Аналитика</h2>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <label class="form-label">Дней</label>
+        <input class="form-control" type="number" name="days" value="@Model.Days" min="1" max="90" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label">Топ</label>
+        <input class="form-control" type="number" name="take" value="@Model.Take" min="1" max="50" />
+    </div>
+    <div class="col-auto align-self-end">
+        <button class="btn btn-primary" type="submit">Показать</button>
+    </div>
+</form>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="alert alert-info">Пока нет данных по просмотрам.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Статья</th>
+                <th class="text-end">Просмотры</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items.OrderByDescending(x => x.Views))
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td class="text-end">@item.Views</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+

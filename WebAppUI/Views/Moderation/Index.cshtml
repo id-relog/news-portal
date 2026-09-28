@@ -1,0 +1,55 @@
+@model WebAppUI.Models.Moderation.ModerationQueueViewModel
+@{
+    ViewData["Title"] = "Модерация комментариев";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Модерация комментариев</h2>
+</div>
+
+@if (Model.PendingComments.Count == 0)
+{
+    <div class="alert alert-success">Очередь пуста.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Имя</th>
+                <th>Текст</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var c in Model.PendingComments.OrderBy(x => x.CreatedAtUtc))
+        {
+            <tr>
+                <td class="text-muted">@c.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                <td>@c.DisplayName</td>
+                <td style="white-space: pre-wrap">@c.Body</td>
+                <td class="text-end">
+                    <form asp-action="Approve" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button class="btn btn-sm btn-success" type="submit">Одобрить</button>
+                    </form>
+                    <form asp-action="Reject" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Отклонить</button>
+                    </form>
+                    <form asp-action="Ban" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input type="hidden" name="reason" value="Бан за комментарий" />
+                        <button class="btn btn-sm btn-danger" type="submit">Бан</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+

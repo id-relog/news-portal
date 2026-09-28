@@ -1,0 +1,43 @@
+﻿@model List<WebAppUI.Models.UserViewModel>
+
+@{
+    ViewData["Title"] = "Управление пользователями";
+}
+
+<h2 class="mt-4">Пользователи системы</h2>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" id="searchInput" class="form-control" placeholder="Поиск по email..." />
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-success">Создать пользователя</a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+        <div class="alert alert-success alert-dismissible fade show">
+        @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+}
+
+<div id="usersTable">
+    @await Html.PartialAsync("_UsersTable", Model)
+</div>
+
+@section Scripts {
+        <script>
+            $('#searchInput').on('keyup', function () {
+                var term = $(this).val();
+                $.ajax({
+                    url: '@Url.Action("Search", "UserManagement")',
+                    data: { term: term },
+                    success: function (data) {
+                        $('#usersTable').html(data);
+                    }
+                });
+            });
+        </script>
+}

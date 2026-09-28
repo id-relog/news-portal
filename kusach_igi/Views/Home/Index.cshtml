@@ -1,0 +1,125 @@
+﻿@model HomePageViewModel
+
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<section class="hero-panel mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge rounded-pill text-bg-primary mb-3">Новостной портал без API</span>
+            <h1 class="display-5 fw-bold mb-3">Подробное MVC-приложение для публикации и просмотра новостей</h1>
+            <p class="lead text-secondary mb-4">
+                Текущий проект оформлен как самостоятельный веб-портал: главная страница, список новостей,
+                детальная карточка публикации, категории и наглядная структура редакционного процесса.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a asp-controller="News" asp-action="Index" class="btn btn-primary btn-lg">Открыть новости</a>
+                <a asp-controller="Home" asp-action="Privacy" class="btn btn-outline-secondary btn-lg">О проекте</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="stats-card">
+                <h2 class="h4 mb-3">Что уже есть в приложении</h2>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <strong>@Model.Categories.Count</strong>
+                            <span>разделов</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <strong>@Model.LatestArticles.Count</strong>
+                            <span>актуальных новостей</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <strong>@Model.FeaturedArticles.Count</strong>
+                            <span>избранных материалов</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <strong>3</strong>
+                            <span>основных страницы</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h3 mb-0">Избранные публикации</h2>
+        <a asp-controller="News" asp-action="Index" class="link-primary text-decoration-none">Все новости</a>
+    </div>
+    <div class="row g-4">
+        @foreach (var article in Model.FeaturedArticles)
+        {
+            <div class="col-md-6">
+                <article class="content-card h-100">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-primary fw-semibold">@article.Category</span>
+                        <span class="text-muted">@article.PublishedAt.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <h3 class="h4">@article.Title</h3>
+                    <p class="text-secondary">@article.Summary</p>
+                    <div class="small text-muted mb-3">
+                        Автор: @article.Author • @article.ReadMinutes мин чтения • @article.Views просмотров
+                    </div>
+                    <a href="/news/@article.Slug" class="stretched-link text-decoration-none">Читать подробнее</a>
+                </article>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="h3 mb-3">Редакционный процесс</h2>
+    <div class="timeline-list">
+        @for (var i = 0; i < Model.EditorialSteps.Count; i++)
+        {
+            <div class="timeline-item">
+                <div class="timeline-step">@(i + 1)</div>
+                <div>@Model.EditorialSteps[i]</div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="h3 mb-3">Разделы портала</h2>
+    <div class="row g-4">
+        @foreach (var category in Model.Categories)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="content-card h-100">
+                    <div class="small text-uppercase text-primary fw-semibold mb-2">@category.Name</div>
+                    <p class="mb-3">@category.Description</p>
+                    <div class="small text-muted">Материалов: @category.ArticleCount</div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section>
+    <h2 class="h3 mb-3">Последние материалы</h2>
+    <div class="row g-4">
+        @foreach (var article in Model.LatestArticles)
+        {
+            <div class="col-lg-3 col-md-6">
+                <div class="content-card h-100">
+                    <div class="small text-muted mb-2">@article.Category</div>
+                    <h3 class="h5">@article.Title</h3>
+                    <p class="text-secondary">@article.Summary</p>
+                    <div class="small text-muted">@article.CommentsCount комментариев</div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

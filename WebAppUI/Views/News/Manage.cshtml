@@ -1,0 +1,80 @@
+@model WebAppUI.Models.News.NewsManageViewModel
+@{
+    ViewData["Title"] = "Управление новостями";
+    var canEditContent = User.IsInRole("Administrator") || User.IsInRole("Manager") || User.IsInRole("Correspondent");
+    var canModerate = User.IsInRole("Administrator") || User.IsInRole("Moderator");
+    var canArchiveDelete = User.IsInRole("Administrator") || User.IsInRole("Manager");
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Управление новостями</h2>
+    @if (canEditContent)
+    {
+        <a asp-action="Create" class="btn btn-primary">+ Создать новость</a>
+    }
+</div>
+
+@if (Model.Articles.Count == 0)
+{
+    <div class="alert alert-info">Новостей пока нет.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Категория</th>
+                <th>Статус</th>
+                <th>Дата</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var a in Model.Articles.OrderByDescending(x => x.CreatedAtUtc))
+        {
+            <tr>
+                <td>@a.Title</td>
+                <td>@a.CategoryName</td>
+                <td>@a.Status</td>
+                <td>@a.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                <td class="text-end">
+                    <a asp-action="Details" asp-route-slug="@a.Slug" class="btn btn-sm btn-outline-info">Просмотр</a>
+                    @if (canEditContent)
+                    {
+                        <a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                        <form asp-action="Submit" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">На ревью</button>
+                        </form>
+                    }
+                    @if (canModerate)
+                    {
+                        <form asp-action="Approve" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-outline-success" type="submit">Публиковать</button>
+                        </form>
+                        <form asp-action="Reject" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="note" value="Возврат в черновик редактору" />
+                            <button class="btn btn-sm btn-outline-dark" type="submit">Отклонить</button>
+                        </form>
+                    }
+                    @if (canArchiveDelete)
+                    {
+                        <form asp-action="Archive" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-outline-warning" type="submit">В архив</button>
+                        </form>
+                        <form asp-action="Delete" asp-route-id="@a.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Удалить</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+

@@ -1,0 +1,19 @@
+## Visual Studio / .NET
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+publish/
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Секреты
+appsettings.Development.json
+appsettings.*.Local.json
+*.env
+
+## Логи
+*.log

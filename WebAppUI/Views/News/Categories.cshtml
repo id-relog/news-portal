@@ -1,0 +1,49 @@
+@model List<BLL.DTO.NewsCategoryDTO>
+@{
+    ViewData["Title"] = "Категории";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Категории</h2>
+    <a asp-action="CreateCategory" class="btn btn-primary">+ Добавить категорию</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["SuccessMessage"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Категорий пока нет.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Slug</th>
+                <th>Дата создания</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.Slug</td>
+                <td>@c.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                <td class="text-end">
+                    <a asp-action="EditCategory" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                    <form asp-action="DeleteCategory" asp-route-id="@c.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

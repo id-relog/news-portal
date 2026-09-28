@@ -1,0 +1,146 @@
+@model WebAppUI.Models.News.NewsIndexViewModel
+@{
+    ViewData["Title"] = "Новости";
+}
+
+<div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="mb-0">📰 Все новости</h1>
+            <small class="text-muted">Всего статей: <strong>@Model.TotalCount</strong></small>
+        </div>
+    </div>
+
+    <form method="get" class="card shadow-sm p-4 mb-4">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">🔍 Поиск</label>
+                <input class="form-control" type="text" name="q" value="@Model.Query" placeholder="По заголовку, тексту или тегам..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">📂 Категория</label>
+                <select class="form-select" name="category">
+                    <option value="">Все категории</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        if (string.Equals(Model.Category, c.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <option value="@c.Name" selected>@c.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@c.Name">@c.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">📋 На странице</label>
+                <select class="form-select" name="pageSize">
+                    @foreach (var size in new[] { 5, 10, 15, 20, 30 })
+                    {
+                        if (Model.PageSize == size)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100" type="submit">🔎 Поиск</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (Model.Articles.Count == 0)
+{
+    <div class="alert alert-info text-center py-5" role="alert">
+        <h4 class="mb-2">📭 Нет результатов</h4>
+        <p class="mb-0">Попробуйте изменить критерии поиска или выберите другую категорию.</p>
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var a in Model.Articles)
+        {
+            <a class="list-group-item list-group-item-action p-4" asp-controller="News" asp-action="Details" asp-route-slug="@a.Slug">
+                <div class="row align-items-start">
+                    <div class="col-md-9">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <h5 class="mb-0">@a.Title</h5>
+                            <span class="badge bg-success">@a.CategoryName</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(a.Summary))
+                        {
+                            <p class="mb-3 text-muted">@a.Summary</p>
+                        }
+                        <div class="d-flex gap-3 mb-2">
+                            <small class="text-muted">
+                                📅 @((a.PublishedAtUtc ?? a.CreatedAtUtc).ToLocalTime().ToString("dd.MM.yyyy HH:mm"))
+                            </small>
+                            <small class="text-muted">👁 @a.ViewsCount просмотров</small>
+                            <small class="text-success">👍 @a.LikesCount</small>
+                            <small class="text-danger">👎 @a.DislikesCount</small>
+                        </div>
+                        @if (a.Tags.Count > 0)
+                        {
+                            <div class="mt-2">
+                                @foreach (var tag in a.Tags.Take(5))
+                                {
+                                    <span class="badge bg-light text-dark me-1">#@tag</span>
+                                }
+                                @if (a.Tags.Count > 5)
+                                {
+                                    <span class="badge bg-light text-dark">+@(a.Tags.Count - 5)</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-3 text-end d-none d-md-block">
+                        <span class="text-primary fw-bold">Читать →</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+
+    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+    if (totalPages > 1)
+    {
+        <nav class="mt-5 d-flex justify-content-center">
+            <ul class="pagination">
+                @if (Model.Page > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize" asp-route-q="@Model.Query" asp-route-category="@Model.Category">
+                            ← Назад
+                        </a>
+                    </li>
+                }
+
+                @for (var i = Math.Max(1, Model.Page - 2); i <= Math.Min(totalPages, Model.Page + 2); i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@Model.PageSize" asp-route-q="@Model.Query" asp-route-category="@Model.Category">@i</a>
+                    </li>
+                }
+
+                @if (Model.Page < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize" asp-route-q="@Model.Query" asp-route-category="@Model.Category">
+                            Дальше →
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
+

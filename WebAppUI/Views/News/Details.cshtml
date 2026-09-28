@@ -1,0 +1,225 @@
+@model WebAppUI.Models.News.NewsDetailsViewModel
+@using WebAppUI.Auth
+@using BLL.DTO
+@{
+    ViewData["Title"] = Model.Article.Title;
+}
+
+<!-- Back Button -->
+<div class="mb-4">
+    <a asp-controller="News" asp-action="Index" class="btn btn-outline-secondary">
+        ← Назад к новостям
+    </a>
+</div>
+
+<!-- Article Card -->
+<article class="card shadow-lg">
+    @if (!string.IsNullOrWhiteSpace(Model.Article.ImageUrl))
+    {
+        <div style="position: relative; height: 400px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <img src="@Model.Article.ImageUrl" class="card-img-top" alt="@Model.Article.Title" style="width: 100%; height: 100%; object-fit: cover;" />
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 100%);"></div>
+        </div>
+    }
+    else
+    {
+        <div style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+            <div style="font-size: 4rem; opacity: 0.5;">📰</div>
+        </div>
+    }
+
+    <div class="card-body">
+        <!-- Article Header -->
+        <div class="mb-4">
+            <h1 class="mb-3">@Model.Article.Title</h1>
+
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge bg-primary">@Model.Article.CategoryName</span>
+                <span class="text-muted">📅 @((Model.Article.PublishedAtUtc ?? Model.Article.CreatedAtUtc).ToLocalTime().ToString("dd MMMM yyyy HH:mm", System.Globalization.CultureInfo.GetCultureInfo("ru-RU")))</span>
+                <span class="text-muted ms-2">👁 @Model.Article.ViewsCount просмотров</span>
+            </div>
+
+            <hr />
+        </div>
+
+        <!-- Summary -->
+        @if (!string.IsNullOrWhiteSpace(Model.Article.Summary))
+        {
+            <p class="lead mb-4">@Model.Article.Summary</p>
+        }
+
+        <!-- Content -->
+        <div class="article-content mb-4" style="line-height: 1.8; font-size: 1.05rem; white-space: pre-wrap;">
+            @Model.Article.Content
+        </div>
+
+        <!-- Tags -->
+        @if (Model.Article.Tags.Count > 0)
+        {
+            <div class="mb-4 pb-3 border-bottom">
+                <h6 class="mb-2">🏷️ Теги:</h6>
+                @foreach (var tag in Model.Article.Tags)
+                {
+                    <span class="badge bg-info me-1 mb-1">#@tag</span>
+                }
+            </div>
+        }
+
+        <!-- Reactions -->
+        @if (User.Identity?.IsAuthenticated == true && Model.Article.Status == ArticleStatusDTO.Published)
+        {
+            <div class="d-flex gap-2 mb-4">
+                <form asp-controller="News" asp-action="React" asp-route-slug="@Model.Article.Slug" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="isLike" value="true" />
+                    <button class="btn btn-outline-success" type="submit">👍 Лайк <span class="badge bg-success">@Model.Article.LikesCount</span></button>
+                </form>
+                <form asp-controller="News" asp-action="React" asp-route-slug="@Model.Article.Slug" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="isLike" value="false" />
+                    <button class="btn btn-outline-danger" type="submit">👎 Дизлайк <span class="badge bg-danger">@Model.Article.DislikesCount</span></button>
+                </form>
+            </div>
+        }
+        else if (Model.Article.Status != ArticleStatusDTO.Published)
+        {
+            <div class="alert alert-warning mb-4">⚠️ Реакции недоступны для этой статьи.</div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-4">ℹ️ <a asp-controller="Account" asp-action="Login">Войдите</a>, чтобы поставить лайк или дизлайк.</div>
+        }
+    </div>
+</article>
+
+<!-- Comments Section -->
+@if (Model.Article.Status == ArticleStatusDTO.Published)
+{
+    <section class="mt-5">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <h3 class="mb-0">💬 Комментарии</h3>
+            <span class="badge bg-secondary">@Model.Comments.Count</span>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ✓ @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ✗ @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Add Comment Form -->
+        @if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            <div class="alert alert-info mb-4">
+                🔓 <a asp-controller="Account" asp-action="Login">Войдите</a> или <a asp-controller="Account" asp-action="Register">зарегистрируйтесь</a>, чтобы оставить комментарий.
+            </div>
+        }
+        else
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Оставить комментарий</h6>
+                    <form asp-controller="News" asp-action="AddComment" asp-route-slug="@Model.Article.Slug" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:@(ViewData.ModelState.IsValid ? "none" : "block");"></div>
+
+                        <div class="mb-3">
+                            <textarea asp-for="NewComment.Body" class="form-control" rows="4" placeholder="Ваш комментарий..." required></textarea>
+                            <span asp-validation-for="NewComment.Body" class="text-danger small"></span>
+                            <small class="text-muted d-block mt-1">Максимум 500 символов</small>
+                        </div>
+                        <button class="btn btn-primary" type="submit">📤 Опубликовать</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <!-- Comments List -->
+        @if (Model.Comments.Count == 0)
+        {
+            <div class="alert alert-info text-center py-4">
+                <p class="mb-0">Пока нет комментариев. Будьте первым!</p>
+            </div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var c in Model.Comments.OrderByDescending(x => x.CreatedAtUtc))
+                {
+                    <div class="list-group-item p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <strong>@c.DisplayName</strong>
+                                    <small class="text-muted ms-2">@c.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.GetCultureInfo("ru-RU"))</small>
+                                </h6>
+                            </div>
+
+                            <!-- Moderation Buttons -->
+                            @if (User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Moderator))
+                            {
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <!-- Delete Comment -->
+                                    <form asp-controller="News"
+                                          asp-action="DeleteComment"
+                                          asp-route-commentId="@c.Id"
+                                          asp-route-slug="@Model.Article.Slug"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Удалить этот комментарий?');"
+                                                title="Удалить комментарий">
+                                            🗑 Удалить
+                                        </button>
+                                    </form>
+
+                                    <!-- Ban User -->
+                                    @if (!string.IsNullOrWhiteSpace(c.AuthorUserId))
+                                    {
+                                        <form asp-controller="News"
+                                              asp-action="BanUser"
+                                              asp-route-userId="@c.AuthorUserId"
+                                              asp-route-slug="@Model.Article.Slug"
+                                              asp-route-commentId="@c.Id"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-dark btn-sm"
+                                                    onclick="return confirm('Забанить пользователя @c.DisplayName?');"
+                                                    title="Забанить пользователя">
+                                                🚫 Забанить
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div style="white-space: pre-wrap; line-height: 1.6;">@c.Body</div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+else
+{
+    <div class="alert alert-warning mt-5" role="alert">
+        ⚠️ Комментарии недоступны для этой статьи.
+    </div>
+}
+
