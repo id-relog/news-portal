@@ -150,7 +150,16 @@ namespace WebAppUI.Controllers
             if (string.IsNullOrWhiteSpace(currentUserId)) return Challenge();
 
             var slug = string.IsNullOrWhiteSpace(model.Slug) ? Slugify(model.Title) : Slugify(model.Slug);
-            var imageUrl = await SaveImageAsync(model.ImageFile);
+
+            string? imageUrl;
+            if (!string.IsNullOrWhiteSpace(model.ImageUrl))
+            {
+                imageUrl = model.ImageUrl.Trim();
+            }
+            else
+            {
+                imageUrl = await SaveImageAsync(model.ImageFile);
+            }
 
             var article = new BLL.DTO.NewsArticleDTO
             {
@@ -191,6 +200,7 @@ namespace WebAppUI.Controllers
                 Content = article.Content,
                 CategoryId = article.CategoryId,
                 Tags = string.Join(", ", article.Tags),
+                ImageUrl = article.ImageUrl,
                 CurrentImageUrl = article.ImageUrl
             };
             return View("Editor", BuildEditorModel(model));
@@ -208,11 +218,19 @@ namespace WebAppUI.Controllers
             if (!ModelState.IsValid) return View("Editor", model);
 
             var slug = string.IsNullOrWhiteSpace(model.Slug) ? Slugify(model.Title) : Slugify(model.Slug);
-            var imageUrl = existing.ImageUrl;
-            var uploadedImage = await SaveImageAsync(model.ImageFile);
-            if (!string.IsNullOrWhiteSpace(uploadedImage))
+
+            string? imageUrl = existing.ImageUrl;
+            if (!string.IsNullOrWhiteSpace(model.ImageUrl))
             {
-                imageUrl = uploadedImage;
+                imageUrl = model.ImageUrl.Trim();
+            }
+            else
+            {
+                var uploadedImage = await SaveImageAsync(model.ImageFile);
+                if (!string.IsNullOrWhiteSpace(uploadedImage))
+                {
+                    imageUrl = uploadedImage;
+                }
             }
 
             existing.Title = model.Title.Trim();
@@ -375,6 +393,7 @@ namespace WebAppUI.Controllers
             TempData["SuccessMessage"] = "Категория удалена.";
             return RedirectToAction(nameof(Categories));
         }
+
         [Authorize]
         [HttpPost("/news/{slug}/comment")]
         [ValidateAntiForgeryToken]
@@ -383,7 +402,6 @@ namespace WebAppUI.Controllers
             var article = _articleService.GetBySlug(slug);
             if (article == null) return NotFound();
 
-            // Заполняем аналитику заранее (чтобы не пропадала при ошибке валидации)
             article.ViewsCount = _analyticsService.GetTotalViews(article.Id);
             var reactions = _reactionService.GetCounts(article.Id);
             article.LikesCount = reactions.likes;
@@ -407,7 +425,6 @@ namespace WebAppUI.Controllers
                 });
             }
 
-            // 🟢 АВТОМАТИЧЕСКОЕ ИМЯ ИЗ АККАУНТА
             var displayName = User.Identity?.Name
                            ?? User.FindFirstValue(ClaimTypes.Email)
                            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -420,7 +437,7 @@ namespace WebAppUI.Controllers
                 AuthorUserId = userId,
                 DisplayName = displayName,
                 Body = newComment.Body.Trim(),
-                Status = BLL.DTO.CommentStatusDTO.Approved, // Убедись, что такой статус существует
+                Status = BLL.DTO.CommentStatusDTO.Approved,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
@@ -434,9 +451,8 @@ namespace WebAppUI.Controllers
             return RedirectToAction(nameof(Details), new { slug });
         }
 
-        // 🗑 УДАЛЕНИЕ КОММЕНТАРИЯ (Админ / Модератор)
         [Authorize(Roles = $"{AppRoles.Administrator},{AppRoles.Moderator}")]
-        [HttpPost("comment/{commentId:guid}/delete")]  // ⚠️ Убрали ведущий "/"
+        [HttpPost("comment/{commentId:guid}/delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteComment(Guid commentId, string slug)
         {
@@ -445,9 +461,8 @@ namespace WebAppUI.Controllers
             return RedirectToAction(nameof(Details), new { slug });
         }
 
-        // 🔒 БАН ПОЛЬЗОВАТЕЛЯ (Админ / Модератор)
         [Authorize(Roles = $"{AppRoles.Administrator},{AppRoles.Moderator}")]
-        [HttpPost("user/{userId}/ban")]  // ⚠️ Убрали ведущий "/"
+        [HttpPost("user/{userId}/ban")]
         [ValidateAntiForgeryToken]
         public IActionResult BanUser(string userId, string slug, Guid? commentId)
         {
@@ -462,9 +477,6 @@ namespace WebAppUI.Controllers
             TempData["SuccessMessage"] = "Пользователь заблокирован.";
             return RedirectToAction(nameof(Details), new { slug });
         }
-
-
-
 
         [Authorize]
         [HttpPost("/news/{slug}/react")]
@@ -544,4 +556,3 @@ namespace WebAppUI.Controllers
         }
     }
 }
-

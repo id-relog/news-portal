@@ -53,8 +53,16 @@
         </div>
 
         <div class="mb-3">
+            <label asp-for="ImageUrl" class="form-label"></label>
+            <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+            <div class="form-text">Вставь ссылку на картинку из интернета (например, с Unsplash).</div>
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
             <label asp-for="ImageFile" class="form-label"></label>
             <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" />
+            <div class="form-text">Если URL не задан — можно загрузить файл с компьютера.</div>
             @if (!string.IsNullOrWhiteSpace(Model.CurrentImageUrl))
             {
                 <div class="mt-2">

@@ -32,7 +32,11 @@ namespace WebAppUI.Models.News
         [Display(Name = "Теги (через запятую)")]
         public string? Tags { get; set; }
 
-        [Display(Name = "Изображение")]
+        [Display(Name = "URL изображения (ссылка из интернета)")]
+        [MaxLength(512)]
+        public string? ImageUrl { get; set; }
+
+        [Display(Name = "Или загрузить файл с компьютера")]
         public IFormFile? ImageFile { get; set; }
 
         public string? CurrentImageUrl { get; set; }
